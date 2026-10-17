@@ -34,24 +34,24 @@
 #define PD12                     11  // D11
 #define PA8                      12  // D12
 #define PA13                     13  // D13
-#define PD5                      14  // D14 TX3
-#define PD6                      15  // D15 RX3
-#define PB10                     16  // D16 TX2
-#define PB11                     17  // D17 RX2
-#define PD11                     18  // D18 TX1
-#define PD10                     19  // D19 RX1
-#define PD9                      20  // D20 SDA
-#define PD8                      21  // D21 SCL
+#define PD5                      14  // D14 USART2 TX
+#define PD6                      15  // D15 USART2 RX
+#define PB10                     16  // D16 USART3 TX
+#define PB11                     17  // D17 USART3 RX
+#define PD11                     18  // D18 GPIO
+#define PD10                     19  // D19 GPIO
+#define PD9                      20  // D20 GPIO / USART3 RX
+#define PD8                      21  // D21 GPIO / USART3 TX
 #define PB15                     22  // D22
 #define PB14                     23  // D23
 #define PB13                     24  // D24
-#define PB10_D25                 25  // D25 alias of D16 / PB10
+#define PA14                     25  // D25 SWCLK
 #define PB12                     26  // D26
 #define PE15                     27  // D27
 #define PD7                      28  // D28
 #define PE14                     29  // D29
 #define PE13                     30  // D30
-#define PB11_D31                 31  // D31 alias of D17 / PB11
+#define PB2                      31  // D31 BOOT1
 #define PB6                      32  // D32
 #define PB7                      33  // D33 
 #define PB8                      34  // D34
@@ -92,8 +92,8 @@
 #define PC4                      PIN_A14
 #define PC5                      PIN_A15
 
-#define PA11                     70 // USB_DP
-#define PA12                     71 // USB_DM
+#define PA11                     70 // USB_DM
+#define PA12                     71 // USB_DP
 #define PE1_D72                  72 // SPI-Flash CS, alias of D39 / PE1
 #define PB4_D73                  73 // SPI1 MISO, alias of D45 / PB4
 #define PB5_D74                  74 // SPI1 MOSI, alias of D40 / PB5
@@ -105,8 +105,8 @@
 #define PC10                     79 // SPI3 SCK
 #define PC11                     80 // SPI3 MISO
 #define PC12                     81 // SPI3 MOSI
-#define PA14                     82
-#define PB2                      83
+#define PA14_D82                 82 // Compatibility alias of D25 / PA14
+#define PB2_D83                  83 // Compatibility alias of D31 / PB2
 #define PC14                     84
 #define PC15                     85
 
@@ -184,12 +184,13 @@
   #define PIN_SPI_SCK           PB3_D75 // NRF24 connector & W25Q16 (on board flash)
 #endif
 
-// I2C Definitions
+// I2C1 on direct GPIO headers D33 (SDA) and D32 (SCL).
+// D20 / PD9 and D21 / PD8 do not support hardware I2C.
 #ifndef PIN_WIRE_SDA
-  #define PIN_WIRE_SDA          PD9
+  #define PIN_WIRE_SDA          PB7
 #endif
 #ifndef PIN_WIRE_SCL
-  #define PIN_WIRE_SCL          PD8
+  #define PIN_WIRE_SCL          PB6
 #endif
 
 // Timer Definitions

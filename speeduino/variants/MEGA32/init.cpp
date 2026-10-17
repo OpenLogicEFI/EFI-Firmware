@@ -1452,46 +1452,110 @@ void setPinMapping(byte boardID)
         pinWMIIndicator = 35;
         pinWMIEnabled = 36;
       #elif defined(STM32F407xx)
-        pinInjector1 = PD15; //Output pin injector 1 is on
-        pinInjector2 = PD14; //Output pin injector 2 is on
-        pinInjector3 = PD13; //Output pin injector 3 is on
-        pinInjector4 = PD12; //Output pin injector 4 is on
-        pinInjector5 = PA8;  //Output pin injector 5 is on
-        pinInjector6 = PE9;  //CAUTION: Uses the same as Coil 4 below.
-        pinCoil1 = PB5;      //Pin for coil 1
-        pinCoil2 = PE12;     //Pin for coil 2
-        pinCoil3 = PE7;      //Pin for coil 3
-        pinCoil4 = PE9;      //Pin for coil 4
-        pinCoil5 = PB8;      //Pin for coil 5 PLACEHOLDER value for now
-        pinTrigger = PD10;   //The CAS pin
-        pinTrigger2 = PD11;  //The Cam Sensor pin
-        pinTrigger3 = PD3;   //The Cam sensor 2 pin
-        pinTPS = PA2;        //TPS input pin
-        pinMAP = PA3;        //MAP sensor pin
-        pinIAT = PA0;        //IAT sensor pin
-        pinCLT = PA1;        //CLS sensor pin
-        pinO2 = PB0;         //O2 Sensor pin
-        pinBat = PA4;        //Battery reference voltage pin
-        pinDisplayReset = PE10; // OLED reset pin
-        pinTachOut = PE11;   //Tacho output pin (Goes to ULN2803)
-        pinIdle1 = PC8;      //Single wire idle control
-        pinIdle2 = PC7;      //2 wire idle control
-        pinBoost = PC6;      //Boost control
-        pinVVT_1 = PC9;      //Default VVT output
-        pinVVT_2 = PE10;     //Default VVT2 output
-        pinFuelPump = PB4;   //Fuel pump output (Goes to ULN2803)
-        pinStepperDir = PB10; //Direction pin for DRV8825 driver
-        pinStepperStep = PB11; //Step pin for DRV8825 driver
-        pinStepperEnable = PB13; //Enable pin for DRV8825
-        pinFan = PB3;        //Pin for the fan output (Goes to ULN2803)
-        pinLaunch = PC13;    //Can be overwritten below
-        pinFlex = PD4;       //Flex sensor (Must be external interrupt enabled)
-        pinResetControl = PE4; //Reset control output
-        pinBaro = PA5;
-        pinVSS = PD9;
-        pinWMIEmpty = PE6;
-        pinWMIIndicator = PE5;
-        pinWMIEnabled = PE3;
+     //Pin definitions for experimental board Tjeerd 
+        //Black F407VE wiki.stm32duino.com/index.php?title=STM32F407
+
+        //******************************************
+        //******** PORTA CONNECTIONS *************** 
+        //******************************************
+        /* = PA0 */ //Wakeup ADC123
+        // = PA1;
+        // = PA2;
+        // = PA3;
+        // = PA4;
+        /* = PA5; */ //ADC12
+        /* = PA6; */ //ADC12 LED_BUILTIN_1
+        pinFuelPump = PA7; //ADC12 LED_BUILTIN_2
+        pinCoil3 = PA8;
+        /* = PA9 */ //TXD1
+        /* = PA10 */ //RXD1
+        /* = PA11 */ //(DO NOT USE FOR SPEEDUINO) USB
+        /* = PA12 */ //(DO NOT USE FOR SPEEDUINO) USB 
+        /* = PA13 */ //(DO NOT USE FOR SPEEDUINO) NOT ON GPIO - DEBUG ST-LINK
+        /* = PA14 */ //(DO NOT USE FOR SPEEDUINO) NOT ON GPIO - DEBUG ST-LINK
+        /* = PA15 */ //(DO NOT USE FOR SPEEDUINO) NOT ON GPIO - DEBUG ST-LINK
+
+        //******************************************
+        //******** PORTB CONNECTIONS *************** 
+        //******************************************
+        /* = PB0; */ //(DO NOT USE FOR SPEEDUINO) ADC123 - SPI FLASH CHIP CS pin
+        pinBaro = PB1; //ADC12
+        /* = PB2; */ //(DO NOT USE FOR SPEEDUINO) BOOT1 
+        /* = PB3; */ //(DO NOT USE FOR SPEEDUINO) SPI1_SCK FLASH CHIP
+        /* = PB4; */ //(DO NOT USE FOR SPEEDUINO) SPI1_MISO FLASH CHIP
+        /* = PB5; */ //(DO NOT USE FOR SPEEDUINO) SPI1_MOSI FLASH CHIP
+        /* = PB6; */ //NRF_CE
+        /* = PB7; */ //NRF_CS
+        /* = PB8; */ //NRF_IRQ
+        pinCoil2 = PB9; //
+        /* = PB9; */ //
+        pinCoil4 = PB10; //TXD3
+        pinIdle1 = PB11; //RXD3
+        pinIdle2 = PB12; //
+        pinBoost = PB12; //
+        /* = PB13; */ //SPI2_SCK
+        /* = PB14; */ //SPI2_MISO
+        /* = PB15; */ //SPI2_MOSI
+
+        //******************************************
+        //******** PORTC CONNECTIONS *************** 
+        //******************************************
+        pinMAP = PC0; //ADC123 
+        pinTPS = PC1; //ADC123
+        pinIAT = PC2; //ADC123
+        pinCLT = PC3; //ADC123
+        pinO2 = PC4;  //ADC12
+        pinBat = PC5; //ADC12
+        pinVVT_1 = PC6; //
+        pinDisplayReset = PC7; //
+        /* = PC8; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_D0
+        /* = PC9; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_D1
+        /* = PC10; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_D2
+        /* = PC11; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_D3
+        /* = PC12; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_SCK
+        pinTachOut = PC13; //
+        /* = PC14; */ //(DO NOT USE FOR SPEEDUINO) - OSC32_IN
+        /* = PC15; */ //(DO NOT USE FOR SPEEDUINO) - OSC32_OUT
+
+        //******************************************
+        //******** PORTD CONNECTIONS *************** 
+        //******************************************
+        /* = PD0; */ //CANRX
+        /* = PD1; */ //CANTX
+        /* = PD2; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_CMD
+        pinVVT_2 = PD3; //
+        pinFlex = PD4;
+        /* = PD5;*/ //TXD2
+        /* = PD6; */ //RXD2
+        pinCoil1 = PD7; //
+        /* = PD8; */ //
+        pinCoil5 = PD9;//
+        /* = PD10; */ //
+        /* = PD11; */ //
+        pinInjector1 = PD12; //
+        pinInjector2 = PD13; //
+        pinInjector3 = PD14; //
+        pinInjector4 = PD15; //
+
+        //******************************************
+        //******** PORTE CONNECTIONS *************** 
+        //******************************************
+        pinTrigger = PE0; //
+        pinTrigger2 = PE1; //
+        pinStepperEnable = PE2; //
+        /* = PE3; */ //ONBOARD KEY1
+        /* = PE4; */ //ONBOARD KEY2
+        pinStepperStep = PE5; //
+        pinFan = PE6; //
+        pinStepperDir = PE7; //
+        /* = PE8; */ //
+        /* = PE9; */ //
+        /* = PE10; */ //
+        pinInjector5 = PE11; //
+        pinInjector6 = PE12; //
+        /* = PE13; */ //
+        /* = PE14; */ //
+        /* = PE15; */ //
 
       #elif defined(CORE_STM32)
         //https://github.com/stm32duino/Arduino_Core_STM32/blob/master/variants/Generic_F411Cx/variant.h#L28
@@ -2370,112 +2434,48 @@ void setPinMapping(byte boardID)
  
     case 60:
         #if defined(STM32F407xx)
-        //Pin definitions for experimental board Tjeerd 
-        //Black F407VE wiki.stm32duino.com/index.php?title=STM32F407
-        //https://github.com/Tjeerdie/SPECTRE/tree/master/SPECTRE_V0.5
-        
-        //******************************************
-        //******** PORTA CONNECTIONS *************** 
-        //******************************************
-        // = PA0; //Wakeup ADC123
-        // = PA1; //ADC123
-        // = PA2; //ADC123
-        // = PA3; //ADC123
-        // = PA4; //ADC12
-        // = PA5; //ADC12
-        // = PA6; //ADC12 LED_BUILTIN_1
-        // = PA7; //ADC12 LED_BUILTIN_2
-        pinCoil3 = PA8;
-        // = PA9;  //TXD1=Bluetooth module
-        // = PA10; //RXD1=Bluetooth module
-        // = PA11; //(DO NOT USE FOR SPEEDUINO) USB
-        // = PA12; //(DO NOT USE FOR SPEEDUINO) USB 
-        // = PA13;  //(DO NOT USE FOR SPEEDUINO) NOT ON GPIO - DEBUG ST-LINK
-        // = PA14;  //(DO NOT USE FOR SPEEDUINO) NOT ON GPIO - DEBUG ST-LINK
-        // = PA15;  //(DO NOT USE FOR SPEEDUINO) NOT ON GPIO - DEBUG ST-LINK
-
-        //******************************************
-        //******** PORTB CONNECTIONS *************** 
-        //******************************************
-        // = PB0;  //(DO NOT USE FOR SPEEDUINO) ADC123 - SPI FLASH CHIP CS pin
-        pinBaro = PB1; //ADC12
-        // = PB2;  //(DO NOT USE FOR SPEEDUINO) BOOT1 
-        // = PB3;  //(DO NOT USE FOR SPEEDUINO) SPI1_SCK FLASH CHIP
-        // = PB4;  //(DO NOT USE FOR SPEEDUINO) SPI1_MISO FLASH CHIP
-        // = PB5;  //(DO NOT USE FOR SPEEDUINO) SPI1_MOSI FLASH CHIP
-        // = PB6;  //NRF_CE
-        pinCoil6 = PB7;  //NRF_CS
-        // = PB8;  //NRF_IRQ
-        pinCoil2 = PB9; //
-        // = PB9;  //
-        // = PB10; //TXD3
-        // = PB11; //RXD3
-        // = PB12; //
-        // = PB13;  //SPI2_SCK
-        // = PB14;  //SPI2_MISO
-        // = PB15;  //SPI2_MOSI
-
-        //******************************************
-        //******** PORTC CONNECTIONS *************** 
-        //******************************************
-        pinIAT = PC0; //ADC123 
-        pinTPS = PC1; //ADC123
-        pinMAP = PC2; //ADC123 
-        pinCLT = PC3; //ADC123
-        pinO2 = PC4; //ADC12
-        pinBat = PC5;  //ADC12
-        pinBoost = PC6; //
-        pinIdle1 = PC7; //
-        // = PC8;  //(DO NOT USE FOR SPEEDUINO) - SDIO_D0
-        // = PC9;  //(DO NOT USE FOR SPEEDUINO) - SDIO_D1
-        // = PC10;  //(DO NOT USE FOR SPEEDUINO) - SDIO_D2
-        // = PC11;  //(DO NOT USE FOR SPEEDUINO) - SDIO_D3
-        // = PC12;  //(DO NOT USE FOR SPEEDUINO) - SDIO_SCK
-        pinTachOut = PC13; //
-        // = PC14;  //(DO NOT USE FOR SPEEDUINO) - OSC32_IN
-        // = PC15;  //(DO NOT USE FOR SPEEDUINO) - OSC32_OUT
-
-        //******************************************
-        //******** PORTD CONNECTIONS *************** 
-        //******************************************
-        // = PD0;  //CANRX
-        // = PD1;  //CANTX
-        // = PD2;  //(DO NOT USE FOR SPEEDUINO) - SDIO_CMD
-        pinIdle2 = PD3; //
-        // = PD4;  //
-        pinFlex = PD4;
-        // = PD5; //TXD2
-        // = PD6;  //RXD2
-        pinCoil1 = PD7; //
-        // = PD7;  //
-        // = PD8;  //
-        pinCoil5 = PD9;//
-        pinCoil4 = PD10;//
-        // = PD11;  //
-        pinInjector1 = PD12; //
-        pinInjector2 = PD13; //
-        pinInjector3 = PD14; //
-        pinInjector4 = PD15; //
-
-        //******************************************
-        //******** PORTE CONNECTIONS *************** 
-        //******************************************
-        pinTrigger = PE0; //
-        pinTrigger2 = PE1; //
-        pinStepperEnable = PE2; //
-        pinFuelPump = PE3; //ONBOARD KEY1
-        // = PE4;  //ONBOARD KEY2
-        pinStepperStep = PE5; //
-        pinFan = PE6; //
-        pinStepperDir = PE7; //
-        // = PE8;  //
-        pinInjector5 = PE9; //
-        // = PE10;  //
-        pinInjector6 = PE11; //
-        // = PE12; //
-        pinInjector8 = PE13; //
-        pinInjector7 = PE14; //
-        // = PE15;  //
+        // OpenLogicEFI MEGA32: v0.4 shield pins translated to STM32 header connections.
+        // Source: MEGA32_End_User_Pinout.xlsx (Digital pins and Analog and power).
+        pinInjector1 = PD15; // Mega D8: Output pin injector 1 is on
+        pinInjector2 = PD14; // Mega D9: Output pin injector 2 is on
+        pinInjector3 = PD13; // Mega D10: Output pin injector 3 is on
+        pinInjector4 = PD12; // Mega D11: Output pin injector 4 is on
+        pinInjector5 = PA8; // Mega D12: Output pin injector 5 is on
+        pinInjector6 = PE9; // Mega D50: CAUTION: Uses the same as Coil 4 below.
+        pinCoil1 = PB5; // Mega D40: Pin for coil 1
+        pinCoil2 = PE12; // Mega D38: Pin for coil 2
+        pinCoil3 = PE7; // Mega D52: Pin for coil 3
+        pinCoil4 = PE9; // Mega D50: Pin for coil 4
+        pinCoil5 = PB8; // Mega D34: Pin for coil 5 PLACEHOLDER value for now
+        pinTrigger = PD10; // Mega D19: The CAS pin
+        pinTrigger2 = PD11; // Mega D18: The Cam Sensor pin
+        pinTrigger3 = PD3; // Mega D3: The Cam sensor 2 pin
+        pinTPS = PA2; // Mega A2: TPS input pin
+        pinMAP = PA3; // Mega A3: MAP sensor pin
+        pinIAT = PA0; // Mega A0: IAT sensor pin
+        pinCLT = PA1; // Mega A1: CLS sensor pin
+        pinO2 = PB0; // Mega A8: O2 Sensor pin
+        pinBat = PA4; // Mega A4: Battery reference voltage pin
+        pinDisplayReset = PE10; // Mega D48: OLED reset pin
+        pinTachOut = PE11; // Mega D49: Tacho output pin  (Goes to ULN2803)
+        pinIdle1 = PC8; // Mega D5: Single wire idle control
+        pinIdle2 = PC7; // Mega D6: 2 wire idle control
+        pinBoost = PC6; // Mega D7: Boost control
+        pinVVT_1 = PC9; // Mega D4: Default VVT output
+        pinVVT_2 = PE10; // Mega D48: Default VVT2 output
+        pinFuelPump = PB4; // Mega D45: Fuel pump output  (Goes to ULN2803)
+        pinStepperDir = PB10; // Mega D16: Direction pin  for DRV8825 driver
+        pinStepperStep = PB11; // Mega D17: Step pin for DRV8825 driver
+        pinStepperEnable = PB13; // Mega D24: Enable pin for DRV8825
+        pinFan = PB3; // Mega D47: Pin for the fan output (Goes to ULN2803)
+        pinLaunch = PC13; // Mega D51: Can be overwritten below
+        pinFlex = PD4; // Mega D2: Flex sensor (Must be external interrupt enabled)
+        pinResetControl = PE4; // Mega D43: Reset control output
+        pinBaro = PA5; // Mega A5
+        pinVSS = PD9; // Mega D20
+        pinWMIEmpty = PE6; // Mega D46
+        pinWMIIndicator = PE5; // Mega D44
+        pinWMIEnabled = PE3; // Mega D42
      #elif (defined(STM32F411xE) || defined(STM32F401xC))
         //pins PA12, PA11 are used for USB or CAN couldn't be used for GPIO
         //PB2 can't be used as input because is BOOT pin
@@ -2548,148 +2548,120 @@ void setPinMapping(byte boardID)
       
     #endif
       break;
-    default:
+
+    case 61:
       #if defined(STM32F407xx)
-      //Pin definitions for experimental board Tjeerd 
-        //Black F407VE wiki.stm32duino.com/index.php?title=STM32F407
-
-        //******************************************
-        //******** PORTA CONNECTIONS *************** 
-        //******************************************
-        /* = PA0 */ //Wakeup ADC123
-        // = PA1;
-        // = PA2;
-        // = PA3;
-        // = PA4;
-        /* = PA5; */ //ADC12
-        pinFuelPump = PA6; //ADC12 LED_BUILTIN_1
-        /* = PA7; */ //ADC12 LED_BUILTIN_2
-        pinCoil3 = PA8;
-        /* = PA9 */ //TXD1
-        /* = PA10 */ //RXD1
-        /* = PA11 */ //(DO NOT USE FOR SPEEDUINO) USB
-        /* = PA12 */ //(DO NOT USE FOR SPEEDUINO) USB 
-        /* = PA13 */ //(DO NOT USE FOR SPEEDUINO) NOT ON GPIO - DEBUG ST-LINK
-        /* = PA14 */ //(DO NOT USE FOR SPEEDUINO) NOT ON GPIO - DEBUG ST-LINK
-        /* = PA15 */ //(DO NOT USE FOR SPEEDUINO) NOT ON GPIO - DEBUG ST-LINK
-
-        //******************************************
-        //******** PORTB CONNECTIONS *************** 
-        //******************************************
-        /* = PB0; */ //(DO NOT USE FOR SPEEDUINO) ADC123 - SPI FLASH CHIP CS pin
-        pinBaro = PB1; //ADC12
-        /* = PB2; */ //(DO NOT USE FOR SPEEDUINO) BOOT1 
-        /* = PB3; */ //(DO NOT USE FOR SPEEDUINO) SPI1_SCK FLASH CHIP
-        /* = PB4; */ //(DO NOT USE FOR SPEEDUINO) SPI1_MISO FLASH CHIP
-        /* = PB5; */ //(DO NOT USE FOR SPEEDUINO) SPI1_MOSI FLASH CHIP
-        /* = PB6; */ //NRF_CE
-        /* = PB7; */ //NRF_CS
-        /* = PB8; */ //NRF_IRQ
-        pinCoil2 = PB9; //
-        /* = PB9; */ //
-        pinCoil4 = PB10; //TXD3
-        pinIdle1 = PB11; //RXD3
-        pinIdle2 = PB12; //
-        /* pinBoost = PB12; */ //
-        /* = PB13; */ //SPI2_SCK
-        /* = PB14; */ //SPI2_MISO
-        /* = PB15; */ //SPI2_MOSI
-
-        //******************************************
-        //******** PORTC CONNECTIONS *************** 
-        //******************************************
-        pinMAP = PC0; //ADC123 
-        pinTPS = PC1; //ADC123
-        pinIAT = PC2; //ADC123
-        pinCLT = PC3; //ADC123
-        pinO2 = PC4; //ADC12
-        pinBat = PC5; //ADC12
-        /*pinVVT_1 = PC6; */ //
-        pinDisplayReset = PC7; //
-        /* = PC8; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_D0
-        /* = PC9; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_D1
-        /* = PC10; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_D2
-        /* = PC11; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_D3
-        /* = PC12; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_SCK
-        pinTachOut = PC13; //
-        /* = PC14; */ //(DO NOT USE FOR SPEEDUINO) - OSC32_IN
-        /* = PC15; */ //(DO NOT USE FOR SPEEDUINO) - OSC32_OUT
-
-        //******************************************
-        //******** PORTD CONNECTIONS *************** 
-        //******************************************
-        /* = PD0; */ //CANRX
-        /* = PD1; */ //CANTX
-        /* = PD2; */ //(DO NOT USE FOR SPEEDUINO) - SDIO_CMD
-        /* = PD3; */ //
-        /* = PD4; */ //
-        pinFlex = PD4;
-        /* = PD5;*/ //TXD2
-        /* = PD6; */ //RXD2
-        pinCoil1 = PD7; //
-        /* = PD7; */ //
-        /* = PD8; */ //
-        pinCoil5 = PD9;//
-        /* = PD10; */ //
-        /* = PD11; */ //
-        pinInjector1 = PD12; //
-        pinInjector2 = PD13; //
-        pinInjector3 = PD14; //
-        pinInjector4 = PD15; //
-
-        //******************************************
-        //******** PORTE CONNECTIONS *************** 
-        //******************************************
-        pinTrigger = PE0; //
-        pinTrigger2 = PE1; //
-        pinStepperEnable = PE2; //
-        /* = PE3; */ //ONBOARD KEY1
-        /* = PE4; */ //ONBOARD KEY2
-        pinStepperStep = PE5; //
-        pinFan = PE6; //
-        pinStepperDir = PE7; //
-        /* = PE8; */ //
-        /* = PE9; */ //
-        /* = PE10; */ //
-        pinInjector5 = PE11; //
-        pinInjector6 = PE12; //
-        /* = PE13; */ //
-        /* = PE14; */ //
-        /* = PE15; */ //
-      #else
-        #ifndef SMALL_FLASH_MODE //No support for bluepill here anyway
-        //Pin mappings as per the v0.2 shield
-        pinInjector1 = 8; //Output pin injector 1 is on
-        pinInjector2 = 9; //Output pin injector 2 is on
-        pinInjector3 = 10; //Output pin injector 3 is on
-        pinInjector4 = 11; //Output pin injector 4 is on
-        pinInjector5 = 12; //Output pin injector 5 is on
-        pinCoil1 = 28; //Pin for coil 1
-        pinCoil2 = 24; //Pin for coil 2
-        pinCoil3 = 40; //Pin for coil 3
-        pinCoil4 = 36; //Pin for coil 4
-        pinCoil5 = 34; //Pin for coil 5 PLACEHOLDER value for now
-        pinTrigger = 20; //The CAS pin
-        pinTrigger2 = 21; //The Cam Sensor pin
-        pinTPS = A2; //TPS input pin
+        // OpenLogicEFI MEGA32: v0.4 shield pins translated to STM32 header connections.
+        // Source: MEGA32_End_User_Pinout.xlsx (Digital pins and Analog and power).
+        pinInjector1 = PD15; // Mega D8: Output pin injector 1 is on
+        pinInjector2 = PD14; // Mega D9: Output pin injector 2 is on
+        pinInjector3 = PD13; // Mega D10: Output pin injector 3 is on
+        pinInjector4 = PD12; // Mega D11: Output pin injector 4 is on
+        pinInjector5 = PA8; // Mega D12: Output pin injector 5 is on
+        pinInjector6 = PE9; // Mega D50: CAUTION: Uses the same as Coil 4 below.
+        pinCoil1 = PB5; // Mega D40: Pin for coil 1
+        pinCoil2 = PE12; // Mega D38: Pin for coil 2
+        pinCoil3 = PE7; // Mega D52: Pin for coil 3
+        pinCoil4 = PE9; // Mega D50: Pin for coil 4
+        pinCoil5 = PB8; // Mega D34: Pin for coil 5 PLACEHOLDER value for now
+        pinTrigger = PD10; // Mega D19: The CAS pin
+        pinTrigger2 = PD11; // Mega D18: The Cam Sensor pin
+        pinTrigger3 = PD3; // Mega D3: The Cam sensor 2 pin
+        pinTPS = PA2; // Mega A2: TPS input pin
+        pinMAP = PA3; // Mega A3: MAP sensor pin
+        pinIAT = PA0; // Mega A0: IAT sensor pin
+        pinCLT = PA1; // Mega A1: CLS sensor pin
+        pinO2 = PB0; // Mega A8: O2 Sensor pin
+        pinBat = PA4; // Mega A4: Battery reference voltage pin
+        pinDisplayReset = PE10; // Mega D48: OLED reset pin
+        pinTachOut = PE11; // Mega D49: Tacho output pin  (Goes to ULN2803)
+        pinIdle1 = PC8; // Mega D5: Single wire idle control
+        pinIdle2 = PC7; // Mega D6: 2 wire idle control
+        pinBoost = PC6; // Mega D7: Boost control
+        pinVVT_1 = PC9; // Mega D4: Default VVT output
+        pinVVT_2 = PE10; // Mega D48: Default VVT2 output
+        pinFuelPump = PB4; // Mega D45: Fuel pump output  (Goes to ULN2803)
+        pinStepperDir = PB10; // Mega D16: Direction pin  for DRV8825 driver
+        pinStepperStep = PB11; // Mega D17: Step pin for DRV8825 driver
+        pinStepperEnable = PB13; // Mega D24: Enable pin for DRV8825
+        pinFan = PB3; // Mega D47: Pin for the fan output (Goes to ULN2803)
+        pinLaunch = PC13; // Mega D51: Can be overwritten below
+        pinFlex = PD4; // Mega D2: Flex sensor (Must be external interrupt enabled)
+        pinResetControl = PE4; // Mega D43: Reset control output
+        pinBaro = PA5; // Mega A5
+        pinVSS = PD9; // Mega D20
+        pinWMIEmpty = PE6; // Mega D46
+        pinWMIIndicator = PE5; // Mega D44
+        pinWMIEnabled = PE3; // Mega D42
+     #elif (defined(STM32F411xE) || defined(STM32F401xC))
+        //pins PA12, PA11 are used for USB or CAN couldn't be used for GPIO
+        //PB2 can't be used as input because is BOOT pin
+        pinInjector1 = PB7; //Output pin injector 1 is on
+        pinInjector2 = PB6; //Output pin injector 2 is on
+        pinInjector3 = PB5; //Output pin injector 3 is on
+        pinInjector4 = PB4; //Output pin injector 4 is on
+        pinCoil1 = PB9; //Pin for coil 1
+        pinCoil2 = PB8; //Pin for coil 2
+        pinCoil3 = PB3; //Pin for coil 3
+        pinCoil4 = PA15; //Pin for coil 4
+        pinTPS = A2;//TPS input pin
         pinMAP = A3; //MAP sensor pin
         pinIAT = A0; //IAT sensor pin
         pinCLT = A1; //CLS sensor pin
-        #ifdef A8 //Bit hacky, but needed for the atmega2561
         pinO2 = A8; //O2 Sensor pin
-        #endif
         pinBat = A4; //Battery reference voltage pin
-        pinStepperDir = 16; //Direction pin  for DRV8825 driver
-        pinStepperStep = 17; //Step pin for DRV8825 driver
-        pinDisplayReset = 48; // OLED reset pin
-        pinFan = 47; //Pin for the fan output
-        pinFuelPump = 4; //Fuel pump output
-        pinTachOut = 49; //Tacho output pin
-        pinFlex = 3; // Flex sensor (Must be external interrupt enabled)
-        pinBoost = 5;
-        pinIdle1 = 6;
-        pinResetControl = 43; //Reset control output
-        #endif
+        pinBaro = pinMAP;
+        pinTachOut = PB1; //Tacho output pin  (Goes to ULN2803)
+        pinIdle1 = PB2; //Single wire idle control
+        pinIdle2 = PB10; //2 wire idle control
+        pinBoost = PA6; //Boost control
+        pinStepperDir = PB10; //Direction pin  for DRV8825 driver
+        pinStepperStep = PB2; //Step pin for DRV8825 driver
+        pinFuelPump = PA8; //Fuel pump output
+        pinFan = PA5; //Pin for the fan output (Goes to ULN2803)
+
+        //external interrupt enabled pins
+        pinFlex = PC14; // Flex sensor (Must be external interrupt enabled)
+        pinTrigger = PC13; //The CAS pin also led pin so bad idea
+        pinTrigger2 = PC15; //The Cam Sensor pin
+
+     #elif defined(CORE_STM32)
+        //blue pill wiki.stm32duino.com/index.php?title=Blue_Pill
+        //Maple mini wiki.stm32duino.com/index.php?title=Maple_Mini
+        //pins PA12, PA11 are used for USB or CAN couldn't be used for GPIO
+        //PB2 can't be used as input because is BOOT pin
+        pinInjector1 = PB7; //Output pin injector 1 is on
+        pinInjector2 = PB6; //Output pin injector 2 is on
+        pinInjector3 = PB5; //Output pin injector 3 is on
+        pinInjector4 = PB4; //Output pin injector 4 is on
+        pinCoil1 = PB3; //Pin for coil 1
+        pinCoil2 = PA15; //Pin for coil 2
+        pinCoil3 = PA14; //Pin for coil 3
+        pinCoil4 = PA9; //Pin for coil 4
+        pinCoil5 = PA8; //Pin for coil 5
+        pinTPS = A0; //TPS input pin
+        pinMAP = A1; //MAP sensor pin
+        pinIAT = A2; //IAT sensor pin
+        pinCLT = A3; //CLS sensor pin
+        pinO2 = A4; //O2 Sensor pin
+        pinBat = A5; //Battery reference voltage pin
+        pinBaro = pinMAP;
+        pinIdle1 = PB2; //Single wire idle control
+        pinIdle2 = PA2; //2 wire idle control
+        pinBoost = PA1; //Boost control
+        pinVVT_1 = PA0; //Default VVT output
+        pinVVT_2 = PA2; //Default VVT2 output
+        pinStepperDir = PC15; //Direction pin  for DRV8825 driver
+        pinStepperStep = PC14; //Step pin for DRV8825 driver
+        pinStepperEnable = PC13; //Enable pin for DRV8825
+        pinDisplayReset = PB2; // OLED reset pin
+        pinFan = PB1; //Pin for the fan output
+        pinFuelPump = PB11; //Fuel pump output
+        pinTachOut = PB10; //Tacho output pin
+        //external interrupt enabled pins
+        pinFlex = PB8; // Flex sensor (Must be external interrupt enabled)
+        pinTrigger = PA10; //The CAS pin
+        pinTrigger2 = PA13; //The Cam Sensor pin
       #endif  
       break;
   }

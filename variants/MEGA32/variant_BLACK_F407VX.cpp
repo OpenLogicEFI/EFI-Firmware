@@ -54,26 +54,26 @@ const PinName digitalPin[] = {
   PA_13,  // D13
 
   // D14..D21
-  PD_5,   // D14 TX3
-  PD_6,   // D15 RX3
-  PB_10,  // D16 TX2
-  PB_11,  // D17 RX2
-  PD_11,  // D18 TX1
-  PD_10,  // D19 RX1
-  PD_9,   // D20 SDA
-  PD_8,   // D21 SCL
+  PD_5,   // D14 USART2 TX
+  PD_6,   // D15 USART2 RX
+  PB_10,  // D16 USART3 TX
+  PB_11,  // D17 USART3 RX
+  PD_11,  // D18 GPIO
+  PD_10,  // D19 GPIO
+  PD_9,   // D20 GPIO / USART3 RX
+  PD_8,   // D21 GPIO / USART3 TX
 
   // D22..D53
   PB_15,  // D22
   PB_14,  // D23
   PB_13,  // D24
-  PB_10,  // D25 alias of D16 / PB10
+  PA_14,  // D25 SWCLK
   PB_12,  // D26
   PE_15,  // D27
   PD_7,   // D28
   PE_14,  // D29
   PE_13,  // D30
-  PB_11,  // D31 alias of D17 / PB11
+  PB_2,   // D31 BOOT1
   PB_6,   // D32
   PB_7,   // D33
   PB_8,   // D34
@@ -116,8 +116,8 @@ const PinName digitalPin[] = {
   PC_5,   // D69 A15
 
   // Extras
-  PA_11,  // D70 USB_DP
-  PA_12,  // D71 USB_DM
+  PA_11,  // D70 USB_DM
+  PA_12,  // D71 USB_DP
   PE_1,   // D72 SPI-Flash CS
   PB_4,   // D73 SPI1 MISO
   PB_5,   // D74 SPI1 MOSI
@@ -128,8 +128,8 @@ const PinName digitalPin[] = {
   PC_10,  // D79 SPI3 SCK
   PC_11,  // D80 SPI3 MISO
   PC_12,  // D81 SPI3 MOSI
-  PA_14,  // D82
-  PB_2,   // D83
+  PA_14,  // D82 compatibility alias of D25 / PA14
+  PB_2,   // D83 compatibility alias of D31 / PB2
   PC_14,  // D84
   PC_15,  // D85
 };
