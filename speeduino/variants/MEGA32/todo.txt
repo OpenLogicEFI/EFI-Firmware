@@ -1,0 +1,107 @@
+MEGA32 RTC robustness TODO - implementation and test order
+
+Keep implementation changes within the MEGA32 variant where possible; preserve
+shared Speeduino sources and the pinned libraries. These are planned changes,
+not completed fixes. Review basis: STM32 Arduino core 2.6.0 and STM32duino RTC
+1.2.0. Implement and verify one step before proceeding to the next.
+
+Baseline before implementation:
+- Build MEGA32 and record current boot timing, selected hardware RTC source,
+  date/time retention, and behavior when setting time.
+- Use a bench setup for oscillator fault tests and simulated engine triggers.
+- Confirm stock build filters exclude the MEGA32 replacement sources.
+
+1. Establish RTC health and time-validity state.
+   Origin: general improvement to both original and TXT implementations.
+   Separate selected source (LSE/LSI), initialization success, and date/time
+   validity. Include uninitialized/unavailable states. Do not treat selecting a
+   source as proof that initialization succeeded. Start with the minimal state
+   needed by later steps; no runtime recovery yet.
+   Checks:
+   - Build MEGA32; verify reported source matches the hardware selection.
+   - Verify unset time remains distinguishable from valid retained time.
+   - Verify unsuccessful initialization cannot be reported as healthy.
+
+2. Make startup fallback dependable.
+   Origin: incomplete TXT implementation. Depends on #1.
+   A failed LSE startup leaves LSE enabled. Switching RTC sources can make the
+   HAL wait for that oscillator again and enter Error_Handler(). Disable failed
+   LSE, verify cleanup succeeds, and confirm LSI is ready before initializing
+   the RTC. Check backup-domain write access with a bounded wait. Audit library
+   calls that hide failures or invoke Error_Handler(); handle failures locally
+   without changing the pinned library. Report RTC unavailable if recovery
+   cannot complete. Do not reset the backup domain on an unchanged healthy
+   source. Mark time invalid if a necessary reset loses it; #3 refines retention.
+   Checks:
+   - Cold boot with working LSE; battery-backed restart on the same source.
+   - Boot without working LSE; verify LSI advances and firmware startup finishes.
+   - Restart with previously selected LSE now unavailable; verify no second
+     failed-LSE wait in the source-switch path and no Error_Handler() stop.
+   - Inject initialization/cleanup failures; verify honest unavailable status
+     and continued firmware startup. Record worst-case startup duration.
+
+3. Handle retained time and backup-domain contents during source changes.
+   Origin: both implementations. Depends on #1 and #2.
+   Changing RTC sources resets the backup domain and can erase date/time and
+   backup registers. Inventory backup-register users before resetting it.
+   Preserve trustworthy date/time where possible; otherwise explicitly mark it
+   invalid until a new time is supplied. Do not assume time recovered from a
+   failed oscillator is accurate or restore a valid-time marker blindly.
+   Checks:
+   - Same-source restart retains valid time without resetting the domain.
+   - Exercise LSI-to-LSE and LSE-to-LSI transitions; verify the intended
+     retention/invalidation policy and handling of other backup-register data.
+   - Battery loss leaves time invalid; setting date/time restores validity.
+
+4. Avoid restarting the RTC on every time update.
+   Origin: behavior introduced by the TXT implementation. Depends on #1-#3.
+   The original restarted the RTC only when time had not already been set.
+   Normally update date/time directly using the established healthy source.
+   Do not retry crystal detection on every time update. Define how time-setting
+   behaves when RTC is unavailable; never report a successful update falsely.
+   Runtime oscillator failure handling remains #6.
+   Checks:
+   - Repeated TunerStudio time updates on both LSE and LSI without unnecessary
+     end()/begin(), backup resets, or crystal startup waits.
+   - Verify supplied date/time and validity after each update and after reboot.
+   - Verify time-setting while unavailable follows the defined failure policy.
+
+5. Finalize startup wait and retry policy.
+   Origin: both, with greater exposure from the TXT. Depends on #2 and #4.
+   The default LSE attempt can block startup for approximately five seconds.
+   Use measured hardware behavior to choose a bounded startup allowance; do not
+   reject healthy slow-starting crystals. Scope any timeout changes to MEGA32
+   and audit downstream library waits too. Avoid repeated attempts during normal
+   operation. Preserve already-running healthy LSE without restarting it.
+   Checks:
+   - Measure cold and retained-time boots with healthy and unavailable LSE.
+   - Check slow crystal startup, including relevant voltage/temperature limits.
+   - Verify failure paths meet the chosen bound and time updates do not retry.
+
+6. Detect and recover from LSE failure during operation.
+   Origin: neither implementation provides runtime monitoring. Depends on #1-#5.
+   Add bounded, nonblocking health monitoring. Confirm failure without false
+   positives from RTC read boundaries or normal software load. Recover to LSI
+   only when needed, using the cleanup and time-validity policies above. Treat
+   time as uncertain because the stopped duration may be unknown. Do not reuse
+   blocking startup routines unchanged in a running-engine path: audit every
+   recovery call, timeout, and interrupt effect. If safe recovery cannot finish,
+   mark RTC unavailable and defer further recovery rather than block scheduling.
+   Avoid repeated source switching and unbounded retry loops.
+   Checks:
+   - Simulate LSE failure after healthy operation; verify detection, bounded
+     recovery or explicit unavailable status, and invalid-time handling.
+   - Confirm LSI advances after successful recovery; setting time restores
+     validity without unnecessary RTC restarts.
+   - Test healthy RTC and heavy load for false detections; exercise repeated
+     faults and verify retry limits.
+   - With simulated engine triggers, measure scheduling latency/jitter through
+     detection and recovery against the baseline and agreed timing limits.
+
+Final regression gate:
+- Build MEGA32 and verify shared Speeduino sources/libraries remain unchanged.
+- Repeat cold boot, battery-backed restart, battery loss, both source changes,
+  missing-crystal startup, repeated time updates, and runtime failure tests.
+- Verify SD timestamps follow the chosen invalid/unavailable-time policy.
+- Record build results separately from hardware results; a successful build
+  does not establish oscillator recovery or engine scheduling safety.
