@@ -1,4 +1,4 @@
-// MEGA32 replacement: RTC source selection from variants/RTCFix.txt.
+// MEGA32 copy of the shared board file. RTC changes stay in this folder.
 #include "board_stm32_official.h"
 #include "globals.h"
 #include "rtc_clock.h"
@@ -79,46 +79,6 @@ HardwareTimer Timer11(TIM7);
 #endif
 #endif
 
-#ifdef RTC_ENABLED
-STM32RTC& rtc = STM32RTC::getInstance();
-
-static bool stm32EnableLSE()
-{
-  #if defined(RCC_OSCILLATORTYPE_LSE) && defined(RCC_LSE_ON)
-    #if defined(__HAL_RCC_PWR_CLK_ENABLE)
-      __HAL_RCC_PWR_CLK_ENABLE();
-    #endif
-    #if defined(PWR_CR_DBP)
-      PWR->CR |= PWR_CR_DBP;
-    #elif defined(PWR_CR1_DBP)
-      PWR->CR1 |= PWR_CR1_DBP;
-    #elif defined(HAL_PWR_MODULE_ENABLED)
-      HAL_PWR_EnableBkUpAccess();
-    #endif
-
-    RCC_OscInitTypeDef oscInit = {};
-    oscInit.OscillatorType = RCC_OSCILLATORTYPE_LSE;
-    oscInit.LSEState = RCC_LSE_ON;
-
-    if (HAL_RCC_OscConfig(&oscInit) != HAL_OK) {
-      return false;
-    }
-
-    #if defined(RCC_FLAG_LSERDY)
-      return (__HAL_RCC_GET_FLAG(RCC_FLAG_LSERDY) != RESET);
-    #else
-      return true;
-    #endif
-  #else
-    return false;
-  #endif
-}
-
-void stm32SetRtcClockSource()
-{
-  rtc.setClockSource(stm32EnableLSE() ? STM32RTC::LSE_CLOCK : STM32RTC::LSI_CLOCK);
-}
-#endif
 
   void initBoard()
   {
@@ -141,8 +101,7 @@ void stm32SetRtcClockSource()
     * Real Time clock for datalogging/time stamping
     */
     #ifdef RTC_ENABLED
-      stm32SetRtcClockSource();
-      rtc.begin(); // initialise RTC 24H format
+      mega32RtcBegin(); // If the date/time clock fails, continue starting the board.
     #endif
     /*
     ***********************************************************************************************************

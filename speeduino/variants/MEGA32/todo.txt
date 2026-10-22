@@ -1,107 +1,129 @@
-MEGA32 RTC robustness TODO - implementation and test order
+MEGA32 RTC improvements - work and test order
 
-Keep implementation changes within the MEGA32 variant where possible; preserve
-shared Speeduino sources and the pinned libraries. These are planned changes,
-not completed fixes. Review basis: STM32 Arduino core 2.6.0 and STM32duino RTC
-1.2.0. Implement and verify one step before proceeding to the next.
+Keep changes in the MEGA32 firmware variant wherever possible. Leave shared
+Speeduino files and installed libraries unchanged.
+Based on STM32 Arduino core 2.6.0 and STM32duino RTC 1.2.0.
+Finish each step's checks before moving on. No board testing has been done here.
 
-Baseline before implementation:
-- Build MEGA32 and record current boot timing, selected hardware RTC source,
-  date/time retention, and behavior when setting time.
-- Use a bench setup for oscillator fault tests and simulated engine triggers.
-- Confirm stock build filters exclude the MEGA32 replacement sources.
+Terms:
+- RTC: date/time clock. It supplies timestamps; it is not the CPU clock.
+- LSE: external RTC crystal. LSI: internal clock used as a fallback.
+- HAL: ST's hardware-control functions.
+- Backup domain: battery-backed RTC settings and saved data. Resetting it can
+  erase the date/time and other saved values.
+- Valid time: a saved or newly supplied date/time that can be trusted.
+- Original code: shared Speeduino code before our RTC changes.
+- TXT fix: our earlier proposal to try LSE and fall back to LSI.
 
-1. Establish RTC health and time-validity state.
-   Origin: general improvement to both original and TXT implementations.
-   Separate selected source (LSE/LSI), initialization success, and date/time
-   validity. Include uninitialized/unavailable states. Do not treat selecting a
-   source as proof that initialization succeeded. Start with the minimal state
-   needed by later steps; no runtime recovery yet.
+Starting measurements and checks:
+- Build MEGA32. Record startup time, selected RTC clock, whether saved time
+  survives power cycles, and what happens when setting time.
+- Test clock failures on the bench, using simulated engine signals.
+- Check that normal Speeduino builds do not include MEGA32 replacement files.
+
+1. Record whether the RTC started, which clock it uses, and whether time is valid.
+   Status: code written; computer tests pass; board tests still needed.
+   See RTC_TESTING.md for the first batch's board tests.
+   Reason: improvement to both the original code and TXT fix.
+   Keep these three facts separate. Choosing a clock does not prove it started,
+   and a running clock does not prove its date/time is correct. Include states
+   for not started yet and failed. Do not add monitoring during operation yet.
    Checks:
-   - Build MEGA32; verify reported source matches the hardware selection.
-   - Verify unset time remains distinguishable from valid retained time.
-   - Verify unsuccessful initialization cannot be reported as healthy.
+   - Build MEGA32; compare the reported clock with the hardware's selection.
+   - Make sure unset time is distinguishable from valid saved time.
+   - Make sure failed setup is never reported as successful.
 
-2. Make startup fallback dependable.
-   Origin: incomplete TXT implementation. Depends on #1.
-   A failed LSE startup leaves LSE enabled. Switching RTC sources can make the
-   HAL wait for that oscillator again and enter Error_Handler(). Disable failed
-   LSE, verify cleanup succeeds, and confirm LSI is ready before initializing
-   the RTC. Check backup-domain write access with a bounded wait. Audit library
-   calls that hide failures or invoke Error_Handler(); handle failures locally
-   without changing the pinned library. Report RTC unavailable if recovery
-   cannot complete. Do not reset the backup domain on an unchanged healthy
-   source. Mark time invalid if a necessary reset loses it; #3 refines retention.
+2. Make the switch to LSI reliable when LSE cannot start.
+   Status: code written; computer tests pass; board tests still needed.
+   See RTC_TESTING.md. Needs step 1.
+   Reason: closes a gap in the TXT fix.
+   The TXT fix left the failed external crystal switched on. Changing the RTC
+   clock could then make ST's code wait for that failed crystal again and call
+   Error_Handler(), which could stop startup. Turn failed LSE off, check that
+   it stopped, then start and check LSI before setting up the RTC.
+   Check permission to change battery-backed settings, with a time limit.
+   Check hardware/library calls for errors that are hidden or stop startup.
+   Handle failures inside the variant; do not change the installed library.
+   Report RTC unavailable if setup cannot finish, but let the board start.
+   Do not reset saved data if the same healthy clock is still being used.
+   If a necessary reset loses time, mark it invalid; step 3 improves this.
    Checks:
-   - Cold boot with working LSE; battery-backed restart on the same source.
-   - Boot without working LSE; verify LSI advances and firmware startup finishes.
-   - Restart with previously selected LSE now unavailable; verify no second
-     failed-LSE wait in the source-switch path and no Error_Handler() stop.
-   - Inject initialization/cleanup failures; verify honest unavailable status
-     and continued firmware startup. Record worst-case startup duration.
+   - Start with working LSE; restart with the RTC battery connected.
+   - Start without working LSE; verify LSI advances and the board starts.
+   - Restart with a previously used LSE now unavailable. Verify no second wait
+     for the failed crystal during the switch and no Error_Handler() stop.
+   - Make each setup/cleanup operation fail in computer tests. Verify failure
+     is reported and startup returns. Measure worst-case startup on the boards.
 
-3. Handle retained time and backup-domain contents during source changes.
-   Origin: both implementations. Depends on #1 and #2.
-   Changing RTC sources resets the backup domain and can erase date/time and
-   backup registers. Inventory backup-register users before resetting it.
-   Preserve trustworthy date/time where possible; otherwise explicitly mark it
-   invalid until a new time is supplied. Do not assume time recovered from a
-   failed oscillator is accurate or restore a valid-time marker blindly.
+3. Handle saved time and other battery-backed data when changing clocks.
+   Status: not completed. Needs steps 1 and 2.
+   Reason: applies to both the original code and TXT fix.
+   Switching clocks resets the backup domain and can erase time and saved data.
+   Check what else uses that data before resetting it. Keep trustworthy time
+   where possible; otherwise mark it invalid until new time is supplied.
+   Do not blindly trust time from a failed crystal or restore a saved marker
+   that says time is valid when the time itself can no longer be trusted.
    Checks:
-   - Same-source restart retains valid time without resetting the domain.
-   - Exercise LSI-to-LSE and LSE-to-LSI transitions; verify the intended
-     retention/invalidation policy and handling of other backup-register data.
-   - Battery loss leaves time invalid; setting date/time restores validity.
+   - Restart on the same healthy clock without losing saved time.
+   - Switch LSI to LSE and LSE to LSI. Check what is kept or marked invalid,
+     including other data stored in the backup domain.
+   - Losing backup power leaves time invalid; setting time makes it valid again.
 
-4. Avoid restarting the RTC on every time update.
-   Origin: behavior introduced by the TXT implementation. Depends on #1-#3.
-   The original restarted the RTC only when time had not already been set.
-   Normally update date/time directly using the established healthy source.
-   Do not retry crystal detection on every time update. Define how time-setting
-   behaves when RTC is unavailable; never report a successful update falsely.
-   Runtime oscillator failure handling remains #6.
+4. Stop restarting the RTC whenever the user sets the time.
+   Status: the checked HAL code already avoids restarts and crystal retries,
+   and checks for failed writes or impossible dates. Full board tests pending.
+   Review after steps 1-3.
+   Reason: the TXT fix introduced a restart on every update. The original code
+   restarted only when time had not already been set.
+   Normally write the new date/time using the clock already running. Do not
+   repeat crystal startup checks. If the RTC is unavailable, do not falsely
+   mark the new time as successfully set. Later crystal failures are step 6.
    Checks:
-   - Repeated TunerStudio time updates on both LSE and LSI without unnecessary
-     end()/begin(), backup resets, or crystal startup waits.
-   - Verify supplied date/time and validity after each update and after reboot.
-   - Verify time-setting while unavailable follows the defined failure policy.
+   - Set time repeatedly through TunerStudio on LSE and LSI. No unnecessary
+     RTC restarts, saved-data resets, or repeated crystal startup delays.
+   - Check the supplied date/time and validity after updates and power cycles.
+   - Check that setting time on an unavailable RTC follows the intended rules.
 
-5. Finalize startup wait and retry policy.
-   Origin: both, with greater exposure from the TXT. Depends on #2 and #4.
-   The default LSE attempt can block startup for approximately five seconds.
-   Use measured hardware behavior to choose a bounded startup allowance; do not
-   reject healthy slow-starting crystals. Scope any timeout changes to MEGA32
-   and audit downstream library waits too. Avoid repeated attempts during normal
-   operation. Preserve already-running healthy LSE without restarting it.
+5. Decide how long startup may wait and when another attempt is allowed.
+   Status: not completed. Needs steps 2 and 4.
+   Reason: affects both versions; the TXT fix tries LSE on every startup,
+   including boards without a working crystal.
+   The default LSE attempt can take about five seconds. Measure real boards
+   before choosing a time limit; a healthy crystal may start slowly. Keep any
+   timeout changes local to MEGA32. Check waits inside library calls as well.
+   Avoid repeated attempts during normal operation, and do not restart LSE
+   if it is already running properly.
    Checks:
-   - Measure cold and retained-time boots with healthy and unavailable LSE.
-   - Check slow crystal startup, including relevant voltage/temperature limits.
-   - Verify failure paths meet the chosen bound and time updates do not retry.
+   - Measure fresh starts and battery-backed restarts, with and without LSE.
+   - Test slow crystal startup at relevant temperatures and supply voltages.
+   - Verify failure waits stay within the chosen limit, and setting time does
+     not start another crystal attempt.
 
-6. Detect and recover from LSE failure during operation.
-   Origin: neither implementation provides runtime monitoring. Depends on #1-#5.
-   Add bounded, nonblocking health monitoring. Confirm failure without false
-   positives from RTC read boundaries or normal software load. Recover to LSI
-   only when needed, using the cleanup and time-validity policies above. Treat
-   time as uncertain because the stopped duration may be unknown. Do not reuse
-   blocking startup routines unchanged in a running-engine path: audit every
-   recovery call, timeout, and interrupt effect. If safe recovery cannot finish,
-   mark RTC unavailable and defer further recovery rather than block scheduling.
-   Avoid repeated source switching and unbounded retry loops.
+6. Detect a crystal that fails while running and recover to LSI.
+   Status: not implemented. Needs steps 1-5.
+   Reason: neither the original code nor TXT fix watches for this failure.
+   Check RTC health without holding up engine work. Confirm a real failure,
+   rather than mistaking a normal clock update or busy firmware for one.
+   Switch to LSI only when needed, using the cleanup and time rules above.
+   Mark time uncertain because we may not know how long the clock stopped.
+   Do not simply call the startup code while running: check every recovery
+   operation for waits or interrupt changes that could delay engine timing.
+   If recovery cannot finish safely, report RTC unavailable and postpone more
+   attempts. Do not repeatedly switch clocks or retry forever.
    Checks:
-   - Simulate LSE failure after healthy operation; verify detection, bounded
-     recovery or explicit unavailable status, and invalid-time handling.
-   - Confirm LSI advances after successful recovery; setting time restores
-     validity without unnecessary RTC restarts.
-   - Test healthy RTC and heavy load for false detections; exercise repeated
-     faults and verify retry limits.
-   - With simulated engine triggers, measure scheduling latency/jitter through
-     detection and recovery against the baseline and agreed timing limits.
+   - Simulate LSE failing after startup. Check detection, recovery or clear
+     failure status, and time marked invalid. Recovery must have a time limit.
+   - After recovery, LSI advances and setting time restores validity without
+     unnecessarily restarting the RTC.
+   - Test healthy operation under heavy load for false failure reports. Repeat
+     faults to check that retries are limited.
+   - Use simulated engine signals to measure any added delays or variation in
+     engine scheduling. Compare with the starting measurements and agreed limits.
 
-Final regression gate:
-- Build MEGA32 and verify shared Speeduino sources/libraries remain unchanged.
-- Repeat cold boot, battery-backed restart, battery loss, both source changes,
-  missing-crystal startup, repeated time updates, and runtime failure tests.
-- Verify SD timestamps follow the chosen invalid/unavailable-time policy.
-- Record build results separately from hardware results; a successful build
-  does not establish oscillator recovery or engine scheduling safety.
+Final checks after all steps:
+- Build MEGA32; shared Speeduino files and libraries remain unchanged.
+- Repeat fresh starts, battery-backed restarts, loss of backup power, clock
+  changes, missing-crystal startup, time updates, and failures while running.
+- Check SD timestamps follow the agreed rules for invalid or unavailable time.
+- Record computer/build results separately from board results. A successful
+  build does not prove crystal recovery works or engine timing stays correct.
